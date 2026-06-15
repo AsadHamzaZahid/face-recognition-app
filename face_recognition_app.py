@@ -1,6 +1,5 @@
 import streamlit as st
 import numpy as np
-import cv2
 import os
 import pickle
 from PIL import Image
@@ -61,19 +60,18 @@ def detect_faces(img_rgb):
         return []
 
 
+from PIL import ImageDraw, ImageFont
+
 def draw_box(img_rgb, facial_area, name, dist):
-    img = img_rgb.copy()
-    x = facial_area["x"]
-    y = facial_area["y"]
-    w = facial_area["w"]
-    h = facial_area["h"]
+    img = Image.fromarray(img_rgb.copy())
+    draw = ImageDraw.Draw(img)
+    x, y, w, h = facial_area["x"], facial_area["y"], facial_area["w"], facial_area["h"]
     color = (0, 200, 80) if name != "Unknown" else (220, 0, 0)
-    cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+    draw.rectangle([x, y, x+w, y+h], outline=color, width=2)
     label = f"{name} ({dist})"
-    cv2.rectangle(img, (x, y + h - 28), (x + w, y + h), color, cv2.FILLED)
-    cv2.putText(img, label, (x + 6, y + h - 8),
-                cv2.FONT_HERSHEY_DUPLEX, 0.55, (255, 255, 255), 1)
-    return img
+    draw.rectangle([x, y+h-28, x+w, y+h], fill=color)
+    draw.text((x+6, y+h-20), label, fill=(255, 255, 255))
+    return np.array(img)
 
 
 # ── Sidebar ────────────────────────────────────────────────────────────────
